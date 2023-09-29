@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-service
+  namespace: openobserve-minio
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9000
+      targetPort: 9000
+      name: minio
+    - port: 46647
+      targetPort: 41234
+      name: minio-console
+  selector:
+    app: minio
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: minio-single
+  namespace: openobserve-minio
+spec:
+  serviceName: minio-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      containers:
+      - name: minio
+        image: minio/minio:latest
+        args:
+        - server
+        - --console-address
+        - ":41234"
+        - /data
+        env:
+        - name: MINIO_ROOT_USER
+          value: "openobservekey"
+        - name: MINIO_ROOT_PASSWORD
+          value: "openobservesecret"
+        ports:
+        - containerPort: 9000
+        volumeMounts:
+        - name: data
+          mountPath: /data
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
+
