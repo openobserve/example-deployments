@@ -1,6 +1,4 @@
-# Sample configurations
-
-## OpenObserve + minio in kubernetes (1 node minio + 1 node openobserve)
+# OpenObserve + minio in kubernetes (1 node minio + 1 node openobserve)
 
 create namespace:
 
